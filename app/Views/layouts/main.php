@@ -1,0 +1,50 @@
+<?php $appName = (require BASE_PATH . '/config/app.php')['name']; ?>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= e($title ?? $appName) ?> - <?= e($appName) ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?= e(asset('assets/css/app.css')) ?>" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg app-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="<?= e(url('/')) ?>"><?= e($appName) ?></a>
+            <button class="navbar-toggler" type="button" data-nav-toggle data-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="<?= e(url('/')) ?>">Customer</a>
+                    <a class="nav-link" href="<?= e(url('/admin/login')) ?>">Admin</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <div class="container">
+            <?php if ($message = flash('success')): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <?= e($message) ?>
+                    <button type="button" class="btn-close" data-dismiss-alert aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($message = flash('error')): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <?= e($message) ?>
+                    <button type="button" class="btn-close" data-dismiss-alert aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
+            <?= $content ?>
+        </div>
+    </main>
+
+    <?php clear_old(); ?>
+    <script src="<?= e(asset('assets/js/app.js')) ?>" defer></script>
+</body>
+</html>

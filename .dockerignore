@@ -1,0 +1,9 @@
+.git
+.env
+.DS_Store
+Thumbs.db
+*.log
+*.zip
+storage/logs/*
+public/uploads/logos/*
+public/uploads/photos/*

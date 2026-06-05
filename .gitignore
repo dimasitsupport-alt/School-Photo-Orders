@@ -1,0 +1,15 @@
+.env
+.DS_Store
+Thumbs.db
+*.log
+*.zip
+public/error_log
+
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+/public/uploads/logos/*
+!/public/uploads/logos/.gitkeep
+
+/public/uploads/photos/*
+!/public/uploads/photos/.gitkeep

@@ -1,0 +1,10 @@
+Options -Indexes
+RewriteEngine On
+
+<FilesMatch "(^\.|\.log$|\.sql$|\.zip$|\.ini$|\.bak$|\.old$|\.dist$|composer\.(json|lock)$|package(-lock)?\.json$)">
+    Require all denied
+</FilesMatch>
+
+RewriteRule ^$ public/ [L]
+RewriteCond %{REQUEST_URI} !/public/
+RewriteRule ^(.*)$ public/$1 [L]

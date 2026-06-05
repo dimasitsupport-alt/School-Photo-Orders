@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: "School Photo Orders"
+      APP_ENV: local
+      APP_TIMEZONE: Asia/Jakarta
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: school_photo_orders
+      DB_USERNAME: school_user
+      DB_PASSWORD: school_secret
+      DB_CHARSET: utf8mb4
+      MAX_STUDENT_UPLOADS: 500
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - uploads:/var/www/html/public/uploads
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: school_photo_orders
+      MYSQL_USER: school_user
+      MYSQL_PASSWORD: school_secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_secret"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+  uploads:
