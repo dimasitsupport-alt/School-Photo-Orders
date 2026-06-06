@@ -36,9 +36,47 @@ RUN mkdir -p public/uploads/logos public/uploads/photos storage/logs \
     && chown -R www-data:www-data public/uploads storage \
     && find public/uploads storage -type d -exec chmod 775 {} \;
 
-# Create a script to initialize MySQL and start both services
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Create entrypoint script inline to avoid "file not found" issues during build
+RUN echo '#!/bin/bash\n\
+\n\
+# Start MySQL in the background\n\
+/etc/init.d/mysql start &\n\
+\n\
+# Wait for MySQL to be ready\n\
+until mysqladmin ping -h localhost --silent; do\n\
+    echo "waiting for mysql to be connectable..."\n\
+    sleep 2\n\
+done\n\
+\n\
+# Create database and user if they dont exist\n\
+DB_DATABASE=${DB_DATABASE:-school_photo_orders}\n\
+DB_USERNAME=${DB_USERNAME:-root}\n\
+DB_PASSWORD=${DB_PASSWORD:-}\n\
+\n\
+if [ -n "$DB_PASSWORD" ]; then\n\
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`$DB_DATABASE\`;"\n\
+    mysql -u root -e "CREATE USER IF NOT EXISTS \"$DB_USERNAME\"@\"localhost\" IDENTIFIED BY \"$DB_PASSWORD\";"\n\
+    mysql -u root -e "GRANT ALL PRIVILEGES ON \`$DB_DATABASE\`.* TO \"$DB_USERNAME\"@\"localhost\";"\n\
+    mysql -u root -e "FLUSH PRIVILEGES;"\n\
+else\n\
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`$DB_DATABASE\`;"\n\
+    mysql -u root -e "CREATE USER IF NOT EXISTS \"$DB_USERNAME\"@\"localhost\";"\n\
+    mysql -u root -e "GRANT ALL PRIVILEGES ON \`$DB_DATABASE\`.* TO \"$DB_USERNAME\"@\"localhost\";"\n\
+    mysql -u root -e "FLUSH PRIVILEGES;"\n\
+fi\n\
+\n\
+# Import SQL files\n\
+if [ -f "/var/www/html/database/coolify-import.sql" ]; then\n\
+    mysql -u root "$DB_DATABASE" < /var/www/html/database/coolify-import.sql\n\
+fi\n\
+\n\
+if [ -f "/var/www/html/database/migrations.sql" ]; then\n\
+    mysql -u root "$DB_DATABASE" < /var/www/html/database/migrations.sql\n\
+fi\n\
+\n\
+# Start Apache in the foreground\n\
+exec apache2-foreground' > /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["apache2-foreground"]
