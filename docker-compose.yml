@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.with-mysql
+      dockerfile: Dockerfile
     environment:
       APP_NAME: "School Photo Orders"
       APP_ENV: local
