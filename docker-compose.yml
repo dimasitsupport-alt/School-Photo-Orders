@@ -1,39 +1,24 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.with-mysql
     environment:
       APP_NAME: "School Photo Orders"
       APP_ENV: local
       APP_TIMEZONE: Asia/Jakarta
-      DB_HOST: mysql
+      DB_HOST: 127.0.0.1
       DB_PORT: 3306
       DB_DATABASE: school_photo_orders
-      DB_USERNAME: school_user
-      DB_PASSWORD: school_secret
+      DB_USERNAME: root
+      DB_PASSWORD: ""
       DB_CHARSET: utf8mb4
       MAX_STUDENT_UPLOADS: 500
-    depends_on:
-      mysql:
-        condition: service_healthy
+    ports:
+      - "8080:80"
     volumes:
       - uploads:/var/www/html/public/uploads
-
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_DATABASE: school_photo_orders
-      MYSQL_USER: school_user
-      MYSQL_PASSWORD: school_secret
-      MYSQL_ROOT_PASSWORD: root_secret
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_secret"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/coolify-import.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
 
 volumes:
   mysql_data:
